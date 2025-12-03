@@ -1,0 +1,1 @@
+# DarkGoku-Encode-Decode-
