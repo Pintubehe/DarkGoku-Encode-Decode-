@@ -1,0 +1,34 @@
+{
+  "name": "cyber-encoder-decoder",
+  "version": "2.1.0",
+  "description": "Cyber-themed Encoder/Decoder Terminal with Matrix animation",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve .",
+    "build": "echo 'Static HTML project - no build required'",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "encoder",
+    "decoder",
+    "cyber",
+    "hacker",
+    "encryption",
+    "base64",
+    "binary",
+    "hex"
+  ],
+  "author": "Cyber Division",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/cyber-encoder-decoder.git"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "serve": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
