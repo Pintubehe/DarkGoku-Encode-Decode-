@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Encoder/Decoder</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: #0a0a0a;
+            color: #0af50a;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* Matrix-style background animation */
+        #matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 2px solid #0af50a;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glitch {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            position: relative;
+            text-shadow: 0.05em 0 0 #ff00ff, -0.03em -0.04em 0 #00ffff;
+            animation: glitch 725ms infinite;
+        }
+        
+        .glitch span {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        @keyframes glitch {
+            0% {
+                text-shadow: 0.05em 0 0 #ff00ff, -0.03em -0.04em 0 #00ffff;
+            }
+            15% {
+                text-shadow: 0.05em 0 0 #ff00ff, -0.03em -0.04em 0 #00ffff;
+            }
+            16% {
+                text-shadow: -0.05em -0.025em 0 #ff00ff, 0.025em 0.035em 0 #00ffff;
+            }
+            49% {
+                text-shadow: -0.05em -0.025em 0 #ff00ff, 0.025em 0.035em 0 #00ffff;
+            }
+            50% {
+                text-shadow: 0.05em 0.035em 0 #ff00ff, 0.03em 0 0 #00ffff;
+            }
+            99% {
+                text-shadow: 0.05em 0.035em 0 #ff00ff, 0.03em 0 0 #00ffff;
+            }
+            100% {
+                text-shadow: -0.05em 0 0 #ff00ff, -0.025em -0.04em 0 #00ffff;
+            }
+        }
+        
+        .subtitle {
+            color: #00ffaa;
+            font-size: 1.2rem;
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background-color: rgba(10, 20, 10, 0.8);
+            border: 1px solid #0af50a;
+            border-radius: 5px;
+            padding: 25px;
+            box-shadow: 0 0 15px rgba(10, 245, 10, 0.3);
+        }
+        
+        .panel h2 {
+            color: #00ffff;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel h2 i {
+            color: #ff00ff;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #00ffaa;
+            font-weight: bold;
+        }
+        
+        textarea, select, input {
+            width: 100%;
+            padding: 12px;
+            background-color: #001100;
+            border: 1px solid #0af50a;
+            color: #0af50a;
+            font-size: 1rem;
+            border-radius: 3px;
+            resize: vertical;
+        }
+        
+        textarea {
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        textarea:focus, select:focus, input:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 25px;
+            background-color: #003300;
+            color: #0af50a;
+            border: 1px solid #0af50a;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            flex-grow: 1;
+        }
+        
+        button:hover {
+            background-color: #0af50a;
+            color: #000;
+            box-shadow: 0 0 15px rgba(10, 245, 10, 0.7);
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #001100;
+            border: 1px dashed #0af50a;
+            border-radius: 3px;
+            min-height: 100px;
+            position: relative;
+        }
+        
+        .result-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background-color: #001100;
+            padding: 0 10px;
+            color: #00ffaa;
+            font-size: 0.9rem;
+        }
+        
+        #result {
+            color: #0af50a;
+            word-wrap: break-word;
+        }
+        
+        .hacker-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #0af50a;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .info-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px;
+            background-color: rgba(0, 30, 0, 0.5);
+            border-left: 3px solid #ff00ff;
+        }
+        
+        .info-box h3 {
+            color: #00ffff;
+            margin-bottom: 10px;
+        }
+        
+        .info-box ul {
+            padding-left: 20px;
+        }
+        
+        .info-box li {
+            margin-bottom: 8px;
+            color: #00ffaa;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            border-top: 1px solid #0af50a;
+            color: #00ffaa;
+            font-size: 0.9rem;
+        }
+        
+        .flashing-cursor {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            background-color: #001100;
+            padding: 10px 20px;
+            border-top: 1px solid #0af50a;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #00ffaa;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .pulse {
+            width: 10px;
+            height: 10px;
+            background-color: #0af50a;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+        
+        .terminal-output {
+            font-family: 'Courier New', monospace;
+            color: #0af50a;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix background -->
+    <canvas id="matrix-bg"></canvas>
+    
+    <div class="container">
+        <header>
+            <h1 class="glitch">CYBER<span>CODER</span></h1>
+            <p class="subtitle">ENCRYPTION & DECRYPTION TERMINAL</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="panel">
+                <h2><i class="fas fa-key"></i> ENCODE DATA</h2>
+                <div class="input-group">
+                    <label for="inputText">INPUT TEXT:</label>
+                    <textarea id="inputText" placeholder="Enter text to encode...">Hello, this is a secret message!</textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="encodeMethod">ENCODING METHOD:</label>
+                    <select id="encodeMethod">
+                        <option value="base64">Base64 Encoding</option>
+                        <option value="rot13">ROT13 Cipher</option>
+                        <option value="binary">Binary Code</option>
+                        <option value="hex">Hexadecimal</option>
+                        <option value="reverse">Reverse Text</option>
+                        <option value="caesar">Caesar Cipher</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="encodeBtn"><i class="fas fa-lock"></i> ENCODE</button>
+                    <button id="clearEncodeBtn"><i class="fas fa-broom"></i> CLEAR</button>
+                </div>
+                
+                <div class="result-box">
+                    <div class="result-label">ENCODED OUTPUT:</div>
+                    <div id="encodedResult" class="terminal-output"></div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2><i class="fas fa-unlock"></i> DECODE DATA</h2>
+                <div class="input-group">
+                    <label for="encodedInput">ENCODED TEXT:</label>
+                    <textarea id="encodedInput" placeholder="Enter encoded text to decode...">SGVsbG8sIHRoaXMgaXMgYSBzZWNyZXQgbWVzc2FnZSE=</textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="decodeMethod">DECODING METHOD:</label>
+                    <select id="decodeMethod">
+                        <option value="base64">Base64 Decoding</option>
+                        <option value="rot13">ROT13 Cipher</option>
+                        <option value="binary">Binary Decode</option>
+                        <option value="hex">Hexadecimal Decode</option>
+                        <option value="reverse">Reverse Text</option>
+                        <option value="caesar">Caesar Cipher</option>
+                    </select>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="decodeBtn"><i class="fas fa-lock-open"></i> DECODE</button>
+                    <button id="clearDecodeBtn"><i class="fas fa-broom"></i> CLEAR</button>
+                </div>
+                
+                <div class="result-box">
+                    <div class="result-label">DECODED OUTPUT:</div>
+                    <div id="decodedResult" class="terminal-output"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="hacker-info">
+            <div class="info-box">
+                <h3><i class="fas fa-code"></i> ENCODING METHODS</h3>
+                <ul>
+                    <li><strong>Base64:</strong> Converts text to ASCII string format</li>
+                    <li><strong>ROT13:</strong> Letter substitution cipher</li>
+                    <li><strong>Binary:</strong> Converts text to binary code (0s & 1s)</li>
+                    <li><strong>Hexadecimal:</strong> Converts text to base-16 format</li>
+                    <li><strong>Reverse:</strong> Reverses the text</li>
+                    <li><strong>Caesar Cipher:</strong> Shifts letters by 3 positions</li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <h3><i class="fas fa-shield-alt"></i> SECURITY STATUS</h3>
+                <div class="terminal-output">
+                    <p>> SYSTEM: <span style="color:#00ffaa;">OPERATIONAL</span></p>
+                    <p>> ENCRYPTION: <span style="color:#00ffaa;">ACTIVE</span></p>
+                    <p>> FIREWALL: <span style="color:#00ffaa;">ENABLED</span></p>
+                    <p>> CONNECTION: <span style="color:#00ffaa;">SECURE</span></p>
+                    <p>> LAST ACTIVITY: <span id="activityTime" style="color:#00ffff;">JUST NOW</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="pulse"></div>
+                <span>CONNECTION ACTIVE</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-microchip"></i>
+                <span>ENCRYPTION ENGINE: READY</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-user-secret"></i>
+                <span>ANONYMOUS MODE: ACTIVE</span>
+            </div>
+        </div>
+        
+        <footer>
+            <p>CYBERCODER v2.1 | SECURE ENCRYPTION TERMINAL | FOR AUTHORIZED USE ONLY</p>
+            <p style="margin-top: 5px; font-size: 0.8rem;">&copy; 2023 CYBER DIVISION | ALL TRANSMISSIONS LOGGED</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Matrix background effect
+        const canvas = document.getElementById('matrix-bg');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%"\'#&_(),.;:?!\\|{}<>[]^~';
+        const lettersArray = letters.split('');
+        
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        
+        const drops = [];
+        for(let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * canvas.height / fontSize) * fontSize;
+        }
+        
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 10, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0af50a';
+            ctx.font = `${fontSize}px monospace`;
+            
+            for(let i = 0; i < drops.length; i++) {
+                const text = lettersArray[Math.floor(Math.random() * lettersArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                
+                drops[i]++;
+            }
+        }
+        
+        setInterval(drawMatrix, 50);
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Custom Base64 functions to handle Unicode properly
+        function encodeBase64(str) {
+            // Convert string to bytes using TextEncoder
+            const encoder = new TextEncoder();
+            const data = encoder.encode(str);
+            
+            // Convert bytes to Base64
+            let binary = '';
+            const bytes = new Uint8Array(data);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+        
+        function decodeBase64(str) {
+            try {
+                // Remove any whitespace
+                str = str.replace(/\s/g, '');
+                
+                // Convert Base64 to binary string
+                const binary = atob(str);
+                
+                // Convert binary string to bytes
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                
+                // Convert bytes to string using TextDecoder
+                const decoder = new TextDecoder();
+                return decoder.decode(bytes);
+            } catch (e) {
+                return "Invalid Base64 format";
+            }
+        }
+        
+        // Encoding/Decoding functions
+        const encodeFunctions = {
+            base64: (text) => encodeBase64(text),
+            rot13: (text) => text.replace(/[a-zA-Z]/g, function(c) {
+                return String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
+            }),
+            binary: (text) => {
+                return text.split('').map(function(char) {
+                    return char.charCodeAt(0).toString(2).padStart(8, '0');
+                }).join(' ');
+            },
+            hex: (text) => {
+                return text.split('').map(function(char) {
+                    return char.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase();
+                }).join(' ');
+            },
+            reverse: (text) => text.split('').reverse().join(''),
+            caesar: (text) => {
+                return text.split('').map(function(char) {
+                    if (char.match(/[a-z]/i)) {
+                        const code = char.charCodeAt(0);
+                        const shift = code >= 65 && code <= 90 ? 65 : 97;
+                        return String.fromCharCode(((code - shift + 3) % 26) + shift);
+                    }
+                    return char;
+                }).join('');
+            }
+        };
+        
+        const decodeFunctions = {
+            base64: (text) => decodeBase64(text),
+            rot13: (text) => text.replace(/[a-zA-Z]/g, function(c) {
+                return String.fromCharCode((c <= 'Z' ? 90 : 122) >= (c = c.charCodeAt(0) + 13) ? c : c - 26);
+            }),
+            binary: (text) => {
+                try {
+                    // Remove extra spaces and split
+                    const binaryArray = text.trim().split(/\s+/);
+                    let result = '';
+                    
+                    for (let i = 0; i < binaryArray.length; i++) {
+                        const bin = binaryArray[i];
+                        // Validate binary string
+                        if (!/^[01]+$/.test(bin)) {
+                            return "Invalid binary format at position " + i;
+                        }
+                        const decimal = parseInt(bin, 2);
+                        if (isNaN(decimal)) {
+                            return "Invalid binary number at position " + i;
+                        }
+                        result += String.fromCharCode(decimal);
+                    }
+                    return result;
+                } catch {
+                    return "Invalid binary format";
+                }
+            },
+            hex: (text) => {
+                try {
+                    // Remove extra spaces and split
+                    const hexArray = text.trim().split(/\s+/);
+                    let result = '';
+                    
+                    for (let i = 0; i < hexArray.length; i++) {
+                        const hex = hexArray[i];
+                        // Validate hex string
+                        if (!/^[0-9A-Fa-f]+$/.test(hex)) {
+                            return "Invalid hex format at position " + i;
+                        }
+                        const decimal = parseInt(hex, 16);
+                        if (isNaN(decimal)) {
+                            return "Invalid hex number at position " + i;
+                        }
+                        result += String.fromCharCode(decimal);
+                    }
+                    return result;
+                } catch {
+                    return "Invalid hexadecimal format";
+                }
+            },
+            reverse: (text) => text.split('').reverse().join(''),
+            caesar: (text) => {
+                return text.split('').map(function(char) {
+                    if (char.match(/[a-z]/i)) {
+                        const code = char.charCodeAt(0);
+                        const shift = code >= 65 && code <= 90 ? 65 : 97;
+                        // 23 = 26 - 3 (reverse shift)
+                        return String.fromCharCode(((code - shift + 23) % 26) + shift);
+                    }
+                    return char;
+                }).join('');
+            }
+        };
+        
+        // Update activity time
+        function updateActivityTime() {
+            const now = new Date();
+            const timeString = now.getHours().toString().padStart(2, '0') + ':' + 
+                             now.getMinutes().toString().padStart(2, '0') + ':' + 
+                             now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('activityTime').textContent = timeString;
+        }
+        
+        // Encode button handler
+        document.getElementById('encodeBtn').addEventListener('click', function() {
+            const inputText = document.getElementById('inputText').value;
+            const method = document.getElementById('encodeMethod').value;
+            
+            if (!inputText.trim()) {
+                document.getElementById('encodedResult').innerHTML = '<span style="color:#ff5555;">ERROR: No input text provided</span>';
+                return;
+            }
+            
+            try {
+                const result = encodeFunctions[method](inputText);
+                document.getElementById('encodedResult').textContent = result;
+                
+                // Auto-fill decode area for convenience
+                document.getElementById('encodedInput').value = result;
+                document.getElementById('decodeMethod').value = method;
+                
+                updateActivityTime();
+            } catch (error) {
+                document.getElementById('encodedResult').innerHTML = `<span style="color:#ff5555;">ENCODING ERROR: ${error.message}</span>`;
+            }
+        });
+        
+        // Decode button handler
+        document.getElementById('decodeBtn').addEventListener('click', function() {
+            const inputText = document.getElementById('encodedInput').value;
+            const method = document.getElementById('decodeMethod').value;
+            
+            if (!inputText.trim()) {
+                document.getElementById('decodedResult').innerHTML = '<span style="color:#ff5555;">ERROR: No encoded text provided</span>';
+                return;
+            }
+            
+            try {
+                const result = decodeFunctions[method](inputText);
+                document.getElementById('decodedResult').textContent = result;
+                updateActivityTime();
+            } catch (error) {
+                document.getElementById('decodedResult').innerHTML = `<span style="color:#ff5555;">DECODING ERROR: ${error.message}</span>`;
+            }
+        });
+        
+        // Clear buttons
+        document.getElementById('clearEncodeBtn').addEventListener('click', function() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('encodedResult').textContent = '';
+        });
+        
+        document.getElementById('clearDecodeBtn').addEventListener('click', function() {
+            document.getElementById('encodedInput').value = '';
+            document.getElementById('decodedResult').textContent = '';
+        });
+        
+        // Test with sample data on load
+        window.addEventListener('DOMContentLoaded', function() {
+            // Update activity time
+            updateActivityTime();
+            
+            // Encode the example text
+            const sampleText = "Hello, this is a secret message!";
+            const encoded = encodeBase64(sampleText);
+            document.getElementById('encodedResult').textContent = encoded;
+            
+            // Set up example for decode
+            document.getElementById('encodedInput').value = encoded;
+            
+            // Update activity time every second
+            setInterval(updateActivityTime, 1000);
+            
+            // Add some console-like effects
+            console.log("%cCYBERCODER TERMINAL INITIALIZED", "color: #0af50a; font-weight: bold; font-size: 14px;");
+            console.log("%c> SYSTEM: OPERATIONAL", "color: #00ffaa;");
+            console.log("%c> ENCRYPTION: ACTIVE", "color: #00ffaa;");
+            console.log("%c> READY FOR ENCODING/DECODING OPERATIONS", "color: #00ffff;");
+        });
+    </script>
+</body>
+  </html>
